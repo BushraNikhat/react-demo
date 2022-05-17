@@ -1,26 +1,35 @@
 import React from 'react'
-import { Container, Nav, Navbar, NavLink } from 'react-bootstrap'
+import { Container, Nav, Navbar } from 'react-bootstrap'
 import {
-  Link
+  NavLink
 } from "react-router-dom";
 
 const AppBar = () => {
+  let activeStyle = {
+    textDecoration: "underline",
+  };
+
+
   return (
     <>
       <Navbar bg="light" expand="lg">
         <Container>
           <Navbar.Brand href="#home">
-            <Link to="/" className='text-decoration-none'>Business</Link>
+            <NavLink to="/" className='text-decoration-none'>Business</NavLink>
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
-            <Nav className="me-auto">
+            <Nav className="me-auto nav-ul">
               <Nav.Link>
-                <Link to="/" className='text-decoration-none'>Create User</Link>
+                <NavLink  to="/" className="text-dark" style={({ isActive }) =>
+                  isActive ? activeStyle : undefined
+                }>Create User</NavLink>
               </Nav.Link>
-              <NavLink>
-                <Link to="/user" className='text-decoration-none'>Users</Link>
-              </NavLink>
+              <Nav.Link>
+                <NavLink to="/user" className="text-dark" style={({ isActive }) =>
+                  isActive ? activeStyle : undefined
+                }>Users</NavLink>
+              </Nav.Link>
 
             </Nav>
           </Navbar.Collapse>

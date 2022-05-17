@@ -84,7 +84,7 @@ const Users = () => {
                       </tbody>
                     </Table>
                   </Col>
-                </Row> : null
+                </Row> : <><div className='text-dark text-center'>Something went wrong</div></>
           }
         </Col>
       </Row>

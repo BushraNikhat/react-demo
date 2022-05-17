@@ -7,24 +7,27 @@ import { validateEmail, validateNumber } from '../utils/common'
 import DatePicker from "react-datepicker"
 import { toast } from 'react-toastify'
 
+const init_user_data = {
+  name: "",
+  email: "",
+  contact_no: null,
+  date_of_birth: null,
+  address: "",
+  business_name: "",
+  business_branches_attributes: {
+    0: {
+      area_name: "",
+      contact_no: ""
+    }
+  }
+}
+
 const UserCreation = () => {
   const dispatch = useDispatch()
-  const [userData, setUserData] = useState({
-    name: "",
-    email: "",
-    contact_no: null,
-    date_of_birth: null,
-    address: "",
-    business_name: "",
-    business_branches_attributes: {
-      0: {
-        area_name: "",
-        contact_no: ""
-      }
-    }
-  })
+  const [userData, setUserData] = useState(init_user_data)
   const [isEmailCorrect, setIsEmailCorrect] = useState(true);
   const [isNumberCorect, setNumberCorrect] = useState(true)
+  const [isBranchContactCorrect, setIsBranchContactCorrect] = useState({0:{isNumberCorect:true}})
 
   const handleUserDetail = (value, name) => {
     setUserData((prev) => ({
@@ -33,6 +36,18 @@ const UserCreation = () => {
     }))
   }
 
+  const handleBranch = (value, index, name) => {
+    setUserData((prev) => ({
+      ...prev,
+      business_branches_attributes: {
+        ...userData.business_branches_attributes,
+        [`${index}`]: {
+          ...userData.business_branches_attributes[index],
+          [name]: value
+        }
+      }
+    }))
+  }
   // adding new branch
   const addBranchField = () => {
     setUserData((prev) => ({
@@ -46,14 +61,17 @@ const UserCreation = () => {
       }
     }))
   }
-
+console.log(isBranchContactCorrect,"isBranchContactCorrect")
   // delete exisisting branch
   const deleteExistingBranchField = (userData, index) => {
-    const newBranch = delete userData.business_branches_attributes[index]
+    delete userData.business_branches_attributes[index]
+    const newBranch = Object.keys(userData.business_branches_attributes).map((key) => {
+      return userData.business_branches_attributes[key]
+    })
     setUserData((prev) => ({
       ...prev,
       business_branches_attributes: {
-        ...userData.business_branches_attributes
+        ...newBranch
       }
     }))
   }
@@ -66,6 +84,7 @@ const UserCreation = () => {
     } else {
       if (isEmailCorrect && isNumberCorect) {
         dispatch(AddNewUSer(userData))
+        setUserData(init_user_data)
       } else {
         toast.warning("please enter correct email")
       }
@@ -77,18 +96,18 @@ const UserCreation = () => {
       <Row className='text-light'>
         <Col lg="12">
           <Row>
-            <Col lg="6" className='mx-auto mt-3 bg-info p-4 rounded shadow-lg'>
+            <Col lg="6" className='mx-auto mt-3 bg-light text-primary p-4 rounded shadow-lg'>
               <Row >
                 <h3 className='text-center'>Create User</h3>
               </Row>
               <Form className=' mx-auto' onSubmit={(event) => createNewUser(event, userData)}>
                 <Form.Group className="mb-3">
                   <Form.Label>Name</Form.Label>
-                  <Form.Control type="text" name="name" value={userData.name} onChange={(event) => handleUserDetail(event.target.value, "name")} required />
+                  <Form.Control type="text" name="name" value={userData.name} onChange={(event) => handleUserDetail(event.target.value, "name")} className="rounded" required />
                 </Form.Group>
                 <Form.Group className="mb-3">
                   <Form.Label>Email</Form.Label>
-                  <Form.Control type="email" name="email" value={userData.email} onChange={(event) => handleUserDetail(event.target.value, "email")} required onBlur={(event) =>
+                  <Form.Control className="rounded" type="email" name="email" value={userData.email} onChange={(event) => handleUserDetail(event.target.value, "email")} required onBlur={(event) =>
                     setIsEmailCorrect(validateEmail(event.target.value))
                   } />
                   <Form.Control.Feedback type={isEmailCorrect ? `invalid` : ""} className="text-danger">
@@ -97,7 +116,7 @@ const UserCreation = () => {
                 </Form.Group>
                 <Form.Group className="mb-3" >
                   <Form.Label>Contact Detail</Form.Label>
-                  <Form.Control type="number" name="contact_no" value={userData.contact_no} onChange={(event) => handleUserDetail(event.target.value, "contact_no")} onBlur={(event) =>
+                  <Form.Control className="rounded" type="number" name="contact_no" value={userData.contact_no} onChange={(event) => handleUserDetail(event.target.value, "contact_no")} onBlur={(event) =>
                     setNumberCorrect(validateNumber(event.target.value))
                   }
                     required />
@@ -115,18 +134,21 @@ const UserCreation = () => {
                 </Form.Group>
                 <Form.Group className="mb-3" >
                   <Form.Label>Bussiness Name</Form.Label>
-                  <Form.Control type="text" name="business_name" value={userData.business_name} onChange={(event) => handleUserDetail(event.target.value, "business_name")} required />
+                  <Form.Control className="rounded" type="text" name="business_name" value={userData.business_name} onChange={(event) => handleUserDetail(event.target.value, "business_name")} required />
                 </Form.Group>
                 <Form.Group className="mb-3" >
                   <Form.Label>Bussiness Branches</Form.Label>
                   {
                     Object.keys(userData.business_branches_attributes).map((branch, index) => {
-                      return <Row className="mb-2 mx-auto">
-                        <Col >
-                          <Form.Control type="text" placeholder='Enter the location' name="area_name" value={userData.business_branches_attributes.area_name} required />
+                      return <Row className="mb-2 text-center">
+                        <Col lg="5">
+                          <Form.Control className="rounded" type="text" placeholder='Enter the location' name="area_name" value={userData.business_branches_attributes[branch].area_name} onChange={(event) => handleBranch(event.target.value, branch, "area_name")} required />
                         </Col>
-                        <Col >
-                          <Form.Control type="text" placeholder='Enter the contact detail' name="contact_no" value={userData.business_branches_attributes.contact_no} required />
+                        <Col lg="5">
+                          <Form.Control className="rounded" type="number" placeholder='Enter the contact detail' name="contact_no" value={userData.business_branches_attributes[branch].contact_no} onChange={(event) => handleBranch(event.target.value, branch, "contact_no")} onBlur={(event)=>setIsBranchContactCorrect(prev=>({...prev,[index]:{isNumberCorect:validateNumber(event.target.value)}}))} required />
+                          <Form.Control.Feedback type={isBranchContactCorrect[index]?.isNumberCorect || isBranchContactCorrect[index]?.isNumberCorect === undefined ? `invalid` : ""} className="text-danger">
+                            Invalid number
+                          </Form.Control.Feedback>
                         </Col>
                         {
                           (Object.keys(userData.business_branches_attributes).length !== 1) && <Col lg="2">
@@ -137,14 +159,17 @@ const UserCreation = () => {
                     })
                   }
                   <Row>
-                    <Col>
-                      <Button onClick={addBranchField}>+</Button>
+                    <Col lg="3" className='mx-auto'>
+                      <Button onClick={addBranchField} className="w-100">Add Branch</Button>
                     </Col>
                   </Row>
                 </Form.Group>
-                <Button variant="info" type="submit" className='shadow-lg'>
-                  Submit
-                </Button>
+                <Row>
+                  <Col lg="2" className='ms-auto'>
+                    <Button variant="primary" type="submit" className='shadow-lg ms-auto w-100'>Submit
+                    </Button>
+                  </Col>
+                </Row>
               </Form>
             </Col>
           </Row>
